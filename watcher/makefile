@@ -5,6 +5,7 @@ CXXFLAGS := -O2 -w $(HEADER_DIR) $(LIB_DIR) -lmysqlclient
 
 OBJS = daemon.o\
 	func.o\
+	../db.o\
 	watcher.o
 
 TARGET = watcher
