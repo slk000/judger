@@ -11,8 +11,8 @@ int main(void){
     create_daemon();
 
     signal(SIGQUIT, on_exit);
-	signal(SIGKILL, on_exit);
-	signal(SIGTERM, on_exit);
+    signal(SIGKILL, on_exit);
+    signal(SIGTERM, on_exit);
 
     connect_mysql();
     while(!IS_EXIT_WATCHER){
@@ -68,7 +68,7 @@ void get_and_judge(void){
         int idle_box_index;
         if (now_judging_cnt >= MAX_JUDGING_CNT){
             // 找到一个空闲的位置
-            idle_box_index = get_index_in_arr2(judgers_box, MAX_JUDGING_CNT, 0);
+            idle_box_index = get_index_in_arr(judgers_box, MAX_JUDGING_CNT, 0);
         }
         else{
             // 或者等待已有的子进程终止
