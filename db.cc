@@ -9,10 +9,6 @@ const char *gDB_NAME = "oj";
 const unsigned int gDB_PORT = 3306;
 MYSQL_RES *DB_RES;
 MYSQL_ROW DB_ROW;
-// int main(){
-
-//     return 0;
-// }
 
 int connect_mysql(){
     if (gDB_CONN) return 1;
@@ -30,18 +26,22 @@ int connect_mysql(){
         return 0;
     }
 }
+
 void close_mysql(void){
     mysql_close(gDB_CONN);
 }
+
 int execute_sql(const char *sql){
     uint sql_length = strlen(sql);
     if (0 == mysql_real_query(gDB_CONN, sql, sql_length)) { 
         // query查询成功返回0
         printf("query %s success\n", sql);
+        DB_RES = mysql_store_result(gDB_CONN);
         return 1;
     }
     else {
         printf("query %s fail: \n", sql, mysql_error(gDB_CONN));
+        DB_RES = NULL;
         return 0;
     }
 }

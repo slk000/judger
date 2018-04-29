@@ -1,5 +1,5 @@
-#ifndef JUDGER_WATCHER_DB_H
-#define JUDGER_WATCHER_DB_H
+#ifndef JUDGER_DB_H
+#define JUDGER_DB_H
 
 #include <stdio.h>
 #include <string.h>

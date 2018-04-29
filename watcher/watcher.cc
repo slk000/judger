@@ -1,6 +1,6 @@
 #include "watcher.h"
 
-int IS_EXIT_WATCHER = 0;
+int gIs_Exit_Watcher = 0;
 
 int main(void){
     create_daemon();
@@ -10,7 +10,7 @@ int main(void){
     signal(SIGTERM, on_exit);
 
     connect_mysql();
-    while(!IS_EXIT_WATCHER){
+    while(!gIs_Exit_Watcher){
         get_and_judge();
         sleep(3);
     }
@@ -22,7 +22,7 @@ void on_exit(int arg){
     printf("exit");
     mysql_free_result(DB_RES); 
     close_mysql();
-    IS_EXIT_WATCHER = 1;
+    gIs_Exit_Watcher = 1;
 }
 
 inline int get_index_in_arr(int *arr, int n, int target){
@@ -38,7 +38,7 @@ int get_submission_ids(uint *submission_queue){
 
     int cnt = 0;
     memset(submission_queue, 0, sizeof(submission_queue));
-    DB_RES = mysql_store_result(gDB_CONN);
+    // DB_RES = mysql_store_result(gDB_CONN);
     
     while(DB_ROW = mysql_fetch_row(DB_RES)){
         submission_queue[cnt] = atoi(DB_ROW[0]);
