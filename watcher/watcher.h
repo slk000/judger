@@ -11,7 +11,15 @@
 #include "../db.h"
 
 #define MAX_JUDGING_CNT (3)
-extern const char *gQUERY_NEW_SUBMISSION;
+#define MAX_SUBMISSION_CNT 100
+
+#define _TO_STRING(x) #x
+#define TO_STRING(x) _TO_STRING(x)
+#define QUERY_NEW_SUBMISSION \
+    "SELECT id FROM `judger_submission` \
+    WHERE judge_result=0 or judge_result=1 \
+    ORDER BY judge_result ASC, id ASC"
+#define QUERY_LIMIT(x) " LIMIT " TO_STRING(x)
 
 // 准备退出watcher
 void on_exit(int /*arg*/);

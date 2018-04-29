@@ -2,11 +2,6 @@
 
 int IS_EXIT_WATCHER = 0;
 
-const char *gQUERY_NEW_SUBMISSION = \
-    "SELECT id FROM `judger_submission` \
-    WHERE judge_result=0 or judge_result=1 \
-    ORDER BY judge_result ASC, id ASC limit 10";
-
 int main(void){
     create_daemon();
 
@@ -38,7 +33,8 @@ inline int get_index_in_arr(int *arr, int n, int target){
 
 // 获取提交，存入submission_queue中，返回个数
 int get_submission_ids(uint *submission_queue){
-    if (!execute_sql(gQUERY_NEW_SUBMISSION)) return 0;
+    if (!execute_sql(QUERY_NEW_SUBMISSION QUERY_LIMIT(MAX_SUBMISSION_CNT)))
+        return 0;
 
     int cnt = 0;
     memset(submission_queue, 0, sizeof(submission_queue));
@@ -54,7 +50,7 @@ int get_submission_ids(uint *submission_queue){
 
 // 为每个提交运行judger
 void get_and_judge(void){
-    uint submissions[3*2];
+    uint submissions[MAX_SUBMISSION_CNT];
     static pid_t judgers_box[100];// 各个judger进程
     static int now_judging_cnt = 0;// 当前运行+未回收的judger个数
     int submissions_cnt = get_submission_ids(submissions);
@@ -66,7 +62,7 @@ void get_and_judge(void){
         uint submission_id = submissions[i];
 
         int idle_box_index;
-        if (now_judging_cnt >= MAX_JUDGING_CNT){
+        if (now_judging_cnt < MAX_JUDGING_CNT){
             // 找到一个空闲的位置
             idle_box_index = get_index_in_arr(judgers_box, MAX_JUDGING_CNT, 0);
         }
