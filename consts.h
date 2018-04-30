@@ -13,7 +13,8 @@ enum Judge_Result {
     JR_MEMLIM = 8,
     JR_OUTPUTLIM = 9,
     JR_RUNERR = 10,
-    JR_COMPERR = 11
+    JR_COMPERR = 11,
+    JR_OTHER = 12
 };
 
 enum Code_Lang {
@@ -35,8 +36,7 @@ enum Code_Lang {
 };
 
 const char LANG_EXT[][8] = { 
-    "c", "cc", "pas", "java", "rb", "sh", "py",
-    "php", "pl", "cs", "m", "bas", "txt","","lua"
+    "c", "cc"
 };
 
 const int BUFFER_SIZE = 512;
