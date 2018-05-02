@@ -29,7 +29,8 @@ int main(int argc, char *argv[]){
         goto judge_done;
     }
 
-
+    test_cases(&submission);
+    
 
 judge_done:
     update_submission(&submission);
@@ -142,11 +143,21 @@ int prepare_run_env(int lang){
     return 1;
 }
 
-int prepare_test_files(struct Submission *s){
+int prepare_test_files(const char *case_dir, const char *case_name){
+    char file_path[BUFFER_SIZE];
+    sprintf(file_path, "%s/%s", case_dir, case_name);
+    int len = strlen(file_path);
+    file_path[len-3] = '\0';
 
+    int ret = 1;
+    ret &= System("cp '%s.in' data.in", file_path);
+    ret &= System("cp '%s.out' data.out", file_path);
+
+    return ret;
 }
 
 int test_cases(struct Submission *s){
+    int allowed_syscalls[BUFFER_SIZE];
     char str_case_dir[BUFFER_SIZE];
     sprintf(str_case_dir, "/home/judge/data/%d", s->problem_id);
     DIR *case_dir = opendir(str_case_dir);
@@ -155,10 +166,22 @@ int test_cases(struct Submission *s){
 
     s->judge_result = JR_ACCEPT;
 
-    while(JR_ACCEPT == s->judge_result && 
-          (dir_ent = readdir(case_dir)) ){
+    int case_cnt = 0;
+    for (; JR_ACCEPT == s->judge_result && 
+          (dir_ent = readdir(case_dir)); case_cnt++){
         if (!is_file_ext(dir_ent->d_name, "in")) continue;
-        
+        printf("%s\n", dir_ent->d_name);
+        prepare_test_files(str_case_dir, dir_ent->d_name);
+        get_allowed_syscalls(s->code_lang, allowed_syscalls);
+
+        pid_t user_pid = fork();
+        if (0 == user_pid){
+
+        }
+        else{
+
+        }
+
     }
 }
 
@@ -171,4 +194,24 @@ int is_file_ext(const char *filename, const char *ext){
     char *extp = (char *)filename + filename_len - ext_len;
     if (extp-1<filename || '.' != *(extp-1)) return 0;
     return strcmp(extp, ext) == 0;
+}
+
+int System(const char *format, ...){
+    char cmd[BUFFER_SIZE];
+    va_list args;
+    va_start(args, format);
+    vsprintf(cmd, format, args);
+    va_end(args);
+    printf("execute cmd %s\n", cmd);
+    return !system(cmd);
+}
+
+int get_allowed_syscalls(int lang, int *arr){
+    int *call = CALLS[lang];
+
+    while(*call) {
+        arr[*call] = 1;
+        call++;
+    }
+    return 1;
 }

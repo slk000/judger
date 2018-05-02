@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -11,6 +12,12 @@
 #include "../consts.h"
 #include "../db.h"
 #include "compile_cmd.h"
+
+#ifdef ___i386
+#include "suscall_32.h"
+#else
+#include "syscall_64.h"
+#endif
 
 #define QUERY_SUBMISSION_INFO \
     "SELECT problemset_problem.id,time_limit,memory_limit,is_spj,code_lang,source_code \
@@ -43,6 +50,8 @@ struct Submission{
     // char source_code[BUFFER_SIZE];
 };
 
+int *CALLS[] = {LANG_CV, LANG_CV};
+
 int get_submission_info(struct Submission *s);
 
 int update_submission(const struct Submission *s);
@@ -55,9 +64,13 @@ int update_compile_info(const struct Submission *s);
 
 int prepare_run_env(int lang);
 
-int prepare_test_files(struct Submission *s);
+int prepare_test_files(const char *case_dir, const char *filename);
 
 int test_cases(struct Submission *s);
 
 int is_file_ext(const char *filename, const char *ext);
+
+int System(const char *format, ...);
+
+int get_allowed_syscalls(int lang, int *arr);
 #endif
