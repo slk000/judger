@@ -6,6 +6,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <dirent.h>
 
 #include "../consts.h"
 #include "../db.h"
@@ -24,7 +25,12 @@
     used_memory=%d, \
     judge_datetime='%s' \
     WHERE id=%d"
-
+#define QUERY_INSERT_COMPILE_INFO \
+    "INSERT INTO `judger_compileinfo`(submission_id, compile_info) \
+    VALUES(%d,\'%%s\')"
+#define QUERY_DELETE_COMPILE_INFO \
+    "DELETE FROM `judger_compileinfo` \
+    WHERE submission_id=%d"
 struct Submission{
     int id;
     int box_id;
@@ -43,5 +49,15 @@ int update_submission(const struct Submission *s);
 
 int create_source_file(const char *code, enum Code_Lang lang);
 
-int compile(const struct Submission *s);
+int compile(struct Submission *s);
+
+int update_compile_info(const struct Submission *s);
+
+int prepare_run_env(int lang);
+
+int prepare_test_files(struct Submission *s);
+
+int test_cases(struct Submission *s);
+
+int is_file_ext(const char *filename, const char *ext);
 #endif

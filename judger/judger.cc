@@ -21,11 +21,11 @@ int main(int argc, char *argv[]){
         exit(0);
     }
     get_submission_info(&submission);
-    submission.judge_result = JR_COMPILE;
-    update_submission(&submission);
     
+
     if(!compile(&submission)){
         submission.judge_result = JR_COMPERR;
+        update_compile_info(&submission);
         goto judge_done;
     }
 
@@ -89,7 +89,9 @@ int create_source_file(const char *code, enum Code_Lang lang){
     return 1;
 }
 
-int compile(const struct Submission *s){
+int compile(struct Submission *s){
+    s->judge_result = JR_COMPILE;
+    update_submission(s);
     pid_t pid = fork();
     if (0 == pid){
         // set_limit();
@@ -107,4 +109,66 @@ int compile(const struct Submission *s){
         printf("compile status :%d\n", status);
         return !status;
     }
+}
+
+
+int update_compile_info(const struct Submission *s){
+    // 删除已有的信息
+    sprintf(sql, QUERY_DELETE_COMPILE_INFO, s->id);
+    execute_sql(sql);
+
+    // 先将查询里的id填好，后面的%%s变成%s供下面填信息用
+    sprintf(sql, QUERY_INSERT_COMPILE_INFO, s->id);
+
+    FILE *fp = fopen("compile_info.txt", "r");
+    char compile_info[BUFFER_SIZE << 7], *end = compile_info;
+    char escaped_info[BUFFER_SIZE << 8];
+    char long_sql[BUFFER_SIZE << 7];
+    // 限制读取信息的大小
+    while (end-compile_info <= (BUFFER_SIZE << 6) && 
+           fgets(end, BUFFER_SIZE << 1, fp) ){
+        end += strlen(end);
+    }
+    fclose(fp);
+
+    mysql_real_escape_string(gDB_CONN, escaped_info, compile_info, end-compile_info);
+
+    sprintf(long_sql, sql, escaped_info);
+    execute_sql(long_sql);
+}
+
+int prepare_run_env(int lang){
+
+    return 1;
+}
+
+int prepare_test_files(struct Submission *s){
+
+}
+
+int test_cases(struct Submission *s){
+    char str_case_dir[BUFFER_SIZE];
+    sprintf(str_case_dir, "/home/judge/data/%d", s->problem_id);
+    DIR *case_dir = opendir(str_case_dir);
+    if (!case_dir) return 0;
+    dirent *dir_ent;
+
+    s->judge_result = JR_ACCEPT;
+
+    while(JR_ACCEPT == s->judge_result && 
+          (dir_ent = readdir(case_dir)) ){
+        if (!is_file_ext(dir_ent->d_name, "in")) continue;
+        
+    }
+}
+
+int is_file_ext(const char *filename, const char *ext){
+    int filename_len = strlen(filename);
+    int ext_len = strlen(ext);
+    if (filename_len <= ext_len) return 0;
+    // char *extp = s+filename_len-1;
+    // for(;extp >= s && *expt != '.';expt--) ;
+    char *extp = (char *)filename + filename_len - ext_len;
+    if (extp-1<filename || '.' != *(extp-1)) return 0;
+    return strcmp(extp, ext) == 0;
 }
